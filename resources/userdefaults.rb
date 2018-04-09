@@ -17,14 +17,13 @@
 #
 
 # align with apple's marketing department
-resource_name :macos_userdefaults
+resource_name :mac_os_x_userdefaults
 provides :mac_os_x_userdefaults
-provides :macos_userdefaults
 
 property :domain, String, required: true
 property :global, [true, false], default: false
 property :key, String
-property :value, [Integer, Float, String, true, false, Hash, Array], required: true, coerce: proc { |v| coerce_booleans(v) }
+property :value, [Integer, Float, String, true, false, Hash, Array], required: true
 property :type, String, default: ''
 property :user, String
 property :sudo, [true, false], default: false
@@ -40,21 +39,22 @@ def coerce_booleans(val)
 end
 
 load_current_value do |desired|
+  value = coerce_booleans(desired.value)
   drcmd = "defaults read '#{desired.domain}' "
   drcmd << "'#{desired.key}' " if desired.key
   shell_out_opts = {}
   shell_out_opts[:user] = desired.user unless desired.user.nil?
-  vc = shell_out("#{drcmd} | grep -qx '#{desired.value}'", shell_out_opts)
+  vc = shell_out("#{drcmd} | grep -qx '#{value}'", shell_out_opts)
   is_set vc.exitstatus == 0 ? true : false
 end
 
 action :write do
   unless current_value.is_set
-    cmd = ['defaults write']
-    cmd.unshift('sudo') if new_resource.sudo
+    cmd = ["defaults write"]
+    cmd.unshift("sudo") if new_resource.sudo
 
     cmd << if new_resource.global
-             'NSGlobalDomain'
+             "NSGlobalDomain"
            else
              "'#{new_resource.domain}'"
            end
@@ -63,8 +63,8 @@ action :write do
     value = new_resource.value
     type = new_resource.type.empty? ? value_type(value) : new_resource.type
     # creates a string of Key1 Value1 Key2 Value2...
-    value = value.map { |k, v| "\"#{k}\" \"#{v}\"" }.join(' ') if type == 'dict'
-    if type == 'array'
+    value = value.map { |k, v| "\"#{k}\" \"#{v}\"" }.join(" ") if type == "dict"
+    if type == "array"
       value = value.join("' '")
       value = "'#{value}'"
     end
@@ -73,6 +73,23 @@ action :write do
 
     execute cmd.join(' ') do
       user new_resource.user unless new_resource.user.nil?
+    end
+  end
+end
+
+action_class do
+  def value_type(value)
+    case value
+    when true, false
+      "bool"
+    when Integer
+      "int"
+    when Float
+      "float"
+    when Hash
+      "dict"
+    when Array
+      "array"
     end
   end
 end

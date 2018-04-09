@@ -1,9 +1,0 @@
-os:
-  - osx
-
-osx_image: xcode8.3
-
-before_install:
-  - brew cask install chefdk
-script:
-  - chef exec delivery local all
