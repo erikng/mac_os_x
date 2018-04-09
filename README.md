@@ -1,6 +1,8 @@
 Description
 ===========
 
+# This cookbook is a fork of the original [mac_os_x cookbook](https://github.com/sous-chefs/mac_os_x) that has now been deprecated. This cookbook has been modernized so that your legacy cookbooks can continue to work while you migrate over to chef14's new macos_userdefaults built-in resource. Without this, you may not be able to deploy a single cookbook that can handle both resources while you migrate.
+
 This cookbook has two resources for managing local user settings on OS
 X:
 
