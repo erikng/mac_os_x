@@ -66,8 +66,8 @@ action :write do
     value = value.map { |k, v| "\"#{k}\" \"#{v}\"" }.join(" ") if type == "dict"
     if type == "array"
       value = value.join("' '")
-      value = "'#{value}'"
     end
+    value = "'#{value}'"
     cmd << "-#{type}" if type
     cmd << value
 
